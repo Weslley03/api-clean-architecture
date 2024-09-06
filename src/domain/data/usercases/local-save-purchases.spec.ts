@@ -2,19 +2,21 @@ class LocalSavePurchases{
   constructor(private readonly cacheStore: CacheStore) {}
   
   async save(): Promise<void> {
-    this.cacheStore.delete();
+    this.cacheStore.delete('purchases');
   };
 };
 
 interface CacheStore {
-  delete: () => void
+  delete: (key: string) => void
 };
 
 class CacheStoreSpy implements CacheStore {
   deleteCallCount = 0;
+  key: string
 
-  delete(): void {
+  delete(key: string): void {
     this.deleteCallCount++
+    this.key = key
   };
 };
 
@@ -45,5 +47,12 @@ describe('LocalSavePurchases', () =>{
     await sut.save();
 
     expect(cacheStore.deleteCallCount).toBe(1);
+  });
+    
+  test('should call delete wth correct key', async () => {
+      const { sut, cacheStore } = makeSut();
+      await sut.save();
+  
+      expect(cacheStore.key).toBe('purchases');
   });
 });
