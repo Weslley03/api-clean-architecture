@@ -5,6 +5,7 @@ export class CacheStoreSpy implements CacheStore {
   actions: Array<CacheStoreSpy.Action> = [];
   deleteKey: string;
   insertKey: string;
+  fetchKey: string;
   insertValues: Array<SavePurchases.Params> = [];
 
   delete(key: string): void {
@@ -17,18 +18,30 @@ export class CacheStoreSpy implements CacheStore {
     this.insertKey = key
     this.insertValues = value;
   };  
+  
+  fetch(key: string): void {
+    this.actions.push(CacheStoreSpy.Action.fetch);
+    this.fetchKey = key
+  };
 
   simulateDeleteError(): void {
     jest.spyOn(CacheStoreSpy.prototype, 'delete').mockImplementationOnce(() => { 
       this.actions.push(CacheStoreSpy.Action.delete);
-      throw new Error() 
+      throw new Error(); 
     } );
   };
 
   simulateInsurtError(): void {
     jest.spyOn(CacheStoreSpy.prototype, 'insert').mockImplementationOnce(() => { 
       this.actions.push(CacheStoreSpy.Action.insert);
-      throw new Error() 
+      throw new Error(); 
+    } );
+  };
+
+  simulateFetchError(): void {
+    jest.spyOn(CacheStoreSpy.prototype, 'fetch').mockImplementationOnce(() => { 
+      this.actions.push(CacheStoreSpy.Action.fetch);
+      throw new Error(); 
     } );
   }
 };
@@ -36,6 +49,7 @@ export class CacheStoreSpy implements CacheStore {
 export namespace CacheStoreSpy {
   export enum Action {
     delete,
-    insert
+    insert,
+    fetch
   };
 };
