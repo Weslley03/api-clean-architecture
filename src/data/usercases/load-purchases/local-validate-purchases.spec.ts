@@ -40,4 +40,40 @@ describe('LocalValidatePurchases', () =>{
     expect(cacheStore.actions).toBe([CacheStoreSpy.Action.fetch]);
     expect(cacheStore.fetchKey).toBe('purchases');
   });
+
+  test('should have no side effects if cache expired',  async () => {
+    const currentDate = new Date();
+    const timestamp = getCacheExpirationDate(currentDate);
+    timestamp.setSeconds(timestamp.getSeconds() -1)
+
+    const { cacheStore, sut} = makeSut(currentDate);
+    
+    cacheStore.fetchResult = {
+      timestamp,
+      value: mockPurchases()
+    };
+
+    const purchases =  await sut.loadAll();
+    expect(cacheStore.actions).toEqual([CacheStoreSpy.Action.fetch]);
+    expect(cacheStore.fetchKey).toBe('purchases');
+    expect(purchases).toEqual([]);
+  });
+
+  test('should return an empty list if cache is on expiration date',  async () => {
+    const currentDate = new Date();
+    const timestamp = getCacheExpirationDate(currentDate);
+    timestamp.setSeconds(timestamp.getSeconds() -1)
+
+    const { cacheStore, sut} = makeSut(currentDate);
+    
+    cacheStore.fetchResult = {
+      timestamp,
+      value: mockPurchases()
+    };
+
+    const purchases =  await sut.loadAll();
+    expect(cacheStore.actions).toEqual([CacheStoreSpy.Action.fetch]);
+    expect(cacheStore.fetchKey).toBe('purchases');
+    expect(purchases).toEqual([]);
+  });
 });
