@@ -37,43 +37,33 @@ describe('LocalValidatePurchases', () =>{
     const { cacheStore, sut} = makeSut();
     cacheStore.fetchResult = { timestamp };
     sut.validate();
-    expect(cacheStore.actions).toBe([CacheStoreSpy.Action.fetch]);
+    expect(cacheStore.actions).toEqual([CacheStoreSpy.Action.fetch]);
     expect(cacheStore.fetchKey).toBe('purchases');
   });
 
-  test('should have no side effects if cache expired',  async () => {
+  test('should delete cache if its on expiration date', () => {
     const currentDate = new Date();
     const timestamp = getCacheExpirationDate(currentDate);
     timestamp.setSeconds(timestamp.getSeconds() -1)
 
     const { cacheStore, sut} = makeSut(currentDate);
     
-    cacheStore.fetchResult = {
-      timestamp,
-      value: mockPurchases()
-    };
+    cacheStore.fetchResult = { timestamp};
 
-    const purchases =  await sut.loadAll();
-    expect(cacheStore.actions).toEqual([CacheStoreSpy.Action.fetch]);
+    sut.validate();
+    expect(cacheStore.actions).toEqual([CacheStoreSpy.Action.fetch, CacheStoreSpy.Action.delete]);
     expect(cacheStore.fetchKey).toBe('purchases');
-    expect(purchases).toEqual([]);
+    expect(cacheStore.deleteKey).toBe('purchases');
   });
 
-  test('should return an empty list if cache is on expiration date',  async () => {
+  test('should delete cache if its expired', () => {
     const currentDate = new Date();
     const timestamp = getCacheExpirationDate(currentDate);
-    timestamp.setSeconds(timestamp.getSeconds() -1)
-
     const { cacheStore, sut} = makeSut(currentDate);
-    
-    cacheStore.fetchResult = {
-      timestamp,
-      value: mockPurchases()
-    };
-
-    const purchases =  await sut.loadAll();
-    expect(cacheStore.actions).toEqual([CacheStoreSpy.Action.fetch]);
+    cacheStore.fetchResult = { timestamp};
+    sut.validate();
+    expect(cacheStore.actions).toEqual([CacheStoreSpy.Action.fetch, CacheStoreSpy.Action.delete]);
     expect(cacheStore.fetchKey).toBe('purchases');
-    expect(purchases).toEqual([]);
+    expect(cacheStore.deleteKey).toBe('purchases');
   });
 });

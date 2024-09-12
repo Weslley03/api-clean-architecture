@@ -21,7 +21,7 @@ describe('LocalLoadPurchases', () =>{
     expect(cacheStore.actions).toEqual([]);
   });
 
-  test('should return empty list if load fails',  async () => {
+  test('should return empty list if load fails', async () => {
     const { cacheStore, sut} = makeSut();
     cacheStore.simulateFetchError();
     const purchases =  await sut.loadAll();
@@ -29,7 +29,7 @@ describe('LocalLoadPurchases', () =>{
     expect(purchases).toEqual([]);
   });
 
-  test('should return a list of purchases if cache is less then 3 days old',  async () => {
+  test('should return a list of purchases if cache is valid',  async () => {
     const currentDate = new Date();
     const timestamp = getCacheExpirationDate(currentDate);
     timestamp.setSeconds(timestamp.getSeconds() +1)
@@ -46,7 +46,7 @@ describe('LocalLoadPurchases', () =>{
     expect(purchases).toEqual(cacheStore.fetchResult.value);
   });
 
-  test('should return an empty list if cache is more than 3 days old',  async () => {
+  test('should have no side effects if cache is expired',  async () => {
     const currentDate = new Date();
     const timestamp = getCacheExpirationDate(currentDate);
     timestamp.setSeconds(timestamp.getSeconds() -1)
@@ -59,9 +59,8 @@ describe('LocalLoadPurchases', () =>{
     };
 
     const purchases =  await sut.loadAll();
-    expect(cacheStore.actions).toEqual([CacheStoreSpy.Action.fetch, CacheStoreSpy.Action.delete]);
+    expect(cacheStore.actions).toEqual([CacheStoreSpy.Action.fetch]);
     expect(cacheStore.fetchKey).toBe('purchases');
-    expect(cacheStore.deleteKey).toBe('purchases');
     expect(purchases).toEqual([]);
   });
 
@@ -77,9 +76,8 @@ describe('LocalLoadPurchases', () =>{
     };
 
     const purchases =  await sut.loadAll();
-    expect(cacheStore.actions).toEqual([CacheStoreSpy.Action.fetch, CacheStoreSpy.Action.delete]);
+    expect(cacheStore.actions).toEqual([CacheStoreSpy.Action.fetch]);
     expect(cacheStore.fetchKey).toBe('purchases');
-    expect(cacheStore.deleteKey).toBe('purchases');
     expect(purchases).toEqual([]);
   });
 
